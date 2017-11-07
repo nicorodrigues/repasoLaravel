@@ -15,11 +15,13 @@ http://repaso.nicorodrigues.com.ar/repaso.sql
 
 ---
 ## **Configurar el proyecto de github (opcional)**
-> git clone https://github.com/nicorodrigues/repasoLaravel
-> cd repasoLaravel
-> composer install
-> cp .env.example .env
-> php artisan key:generate
+```bash
+git clone https://github.com/nicorodrigues/repasoLaravel
+cd repasoLaravel
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
 ---
 ## **Configuramos el proyecto**

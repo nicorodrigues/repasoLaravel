@@ -1,6 +1,6 @@
-#**Repaso de Laravel**
+# **Repaso de Laravel**
 
-##**Creamos un nuevo proyecto**
+## **Creamos un nuevo proyecto**
 
 Arranquemos poniendo en la terminal, en cualquier carpeta que querramos, el siguiente comando:
 ```bash
@@ -10,11 +10,11 @@ composer create-project laravel/laravel repaso
 >Tengamos en cuenta que este comando, va a crear una carpeta dentro de la carpeta donde estemos trabajando actualmente. Por ejemplo, si estamos en la carpeta `php` y creamos el proyecto `repaso`, se va a crear la carpeta `repaso` dentro de `php` que es donde vamos a trabajar.
 
 ---
-##**Descargamos la base de datos**
+## **Descargamos la base de datos**
 http://repaso.nicorodrigues.com.ar/repaso.sql
 
 ---
-##**Configurar el proyecto de github (opcional)**
+## **Configurar el proyecto de github (opcional)**
 > git clone https://github.com/nicorodrigues/repasoLaravel
 > cd repasoLaravel
 > composer install
@@ -22,7 +22,7 @@ http://repaso.nicorodrigues.com.ar/repaso.sql
 > php artisan key:generate
 
 ---
-##**Configuramos el proyecto**
+## **Configuramos el proyecto**
 Intentamos levantar el servidor para ver si no hubo problemas
 
 ```bash
@@ -65,7 +65,7 @@ Configuramos nuestro archivo .env con los datos de la base de datos:
 
 > La contraseña es la misma que usamos para entrar al workbench (generalmente no tiene password o es root)
 
-##**Rutas - Vistas - Controladores**
+## **Rutas - Vistas - Controladores**
 Volvemos a levantar el servidor sabiendo que todo está en orden...
 Borramos nuestra ruta default en el archivo web.php y arrancamos de 0 con una ruta que use get:
 
@@ -156,7 +156,7 @@ width: 50%;
 ```
 
 ---
-##**Modelos**
+## **Modelos**
 
 Como sabemos que vamos a trabajar con una base de datos de productos, empezamos por armar los modelos correspondientes necesarios...
 
@@ -460,10 +460,10 @@ Ya tenemos la posibilidad de guardar datos en la base de datos...
 Ahora, qué pasa si queremos agregarle categorías a nuestros productos...?
 
 ---
-##**Relaciones**
+## **Relaciones**
 Nosotros ya trajimos cosas de la base de datos, pero todavía no jugamos con las categorías o las propiedades.
 
-###**Uno a muchos**
+### **Uno a muchos**
 En el caso de las categorías, vamos a estar teniendo una relación de "uno a muchos".
 
 En este caso estaríamos trabajando con la columna `category_id` de la tabla `products` que referencia a la columna `id` de `categories`.
@@ -472,7 +472,7 @@ Es decir: `products.category_id` --&rarr; `categories.id`
 
 Para esto vamos a agregar las relaciones correspondientes en ambos modelos:
 
-####Product
+#### Product
 Al producto le agregamos su relación con la categoría, en su caso sería con `belongsTo`
 ```php
 public function category() {
@@ -485,7 +485,7 @@ public function category() {
       2. Foreign Key de ese modelo apuntando al actual
       3. Primary Key del modelo actual
 
-####Category
+#### Category
 A la categoría le agregamos su relación con los productos, en su caso sería con `hasMany`
 ```php
 public function products() {
@@ -499,7 +499,7 @@ public function products() {
       3. Primary Key del modelo actual
 
 ---
-####**Accediendo a datos de relaciones**
+#### **Accediendo a datos de relaciones**
 Una vez seteados ambas funciones, ya podemos llamar a sus productos/categoria como si fuera un atributo más.
 
 En el caso que quisieramos obtener la categoría de un producto lo haríamos de la siguiente forma:
@@ -633,12 +633,12 @@ Ya podemos traer datos de la base de datos usando 3 tablas...
 Y si queremos agregar datos...?
 
 ---
-###**Añadir datos con relaciones**
+### **Añadir datos con relaciones**
 
 Puede que al principio parezca complicado, o incluso asuste, pero añadir datos utilizando más de una tabla, no es nada difícil.
 
 ---
-####**Uno a Muchos**
+#### **Uno a Muchos**
 Cuando tenemos una relación como la de `Product` y `Category` en la cual una categoría puede tener más de un producto, nos referimos a una relación de Uno a Muchos, para la cual vamos a usar la función llamada `associate()` la cual nos permite asociar un producto a una categoría.
 
 Empezamos modificando la función que devuelve la vista del formulario para que además le lleve las categorías, de esta forma vamos a obligar a que seleccionen de nuestra lista!
@@ -755,7 +755,7 @@ Si comparamos todo lo que hicimos hasta ahora con lo que sabemos php plano, nos 
 
 
 ---
-####**Muchos a Muchos**
+#### **Muchos a Muchos**
 Ahora vamos con algo más interesante pero igual de fácil. Cuando manejemos 3 tablas, Laravel nos provee de la función `sync()`.
 
 Como venimos haciendo, arrancamos modificando el método que devuelve la vista:

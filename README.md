@@ -1007,9 +1007,10 @@ Tomemos de referencia nuestro formulario de creación pero lo alteramos un poco
 </head>
 <body>
     <div class="container">
-        <h1>Editando {{$product->name}}</h1>
-        <form class="col-md-5" action="/productos/agregar" method="post">
+        <h1>Editando: {{$product->name}}</h1>
+        <form class="col-md-5" action="/productos/{{$product->id}}" method="post">
             {{ csrf_field() }}
+            {{ method_field('patch') }}
             <div class="form-group">
                 <label for="name">Nombre</label>
                 <input type="text" name="name" id="name" value="{{$product->name}}" class="form-control">
@@ -1038,7 +1039,7 @@ Tomemos de referencia nuestro formulario de creación pero lo alteramos un poco
             </div>
             <div class="form-group">
                 <label for="profit_margin">Margen de Ganancia</label>
-                <input type="text" name="profit_margin" id="profit_margin" value="{{$product->name}}" class="form-control">
+                <input type="text" name="profit_margin" id="profit_margin" value="{{$product->profit_margin}}" class="form-control">
                 @if ($errors->has('profit_margin'))
                     <div class="alert alert-danger">
                         <ul>
@@ -1079,9 +1080,32 @@ Tomemos de referencia nuestro formulario de creación pero lo alteramos un poco
 </body>
 </html>
 
+
 ```
 > Como se ve, hay muchísimos cambios en el formulario de edición pero no son nada complicados. Lo que hacemos por ejemplo en la sección de categorías es dentro del `foreach` controlar cual es la categoría que tenemos seteada en el producto y la marcamos.
 > En el caso de las propiedades, evaluamos cada `checkbox` para saber si está entre las propiedades del producto. De ser así, las imprimimos como `checked`.
+
+Ya tenemos las rutas creadas y la vista con el formulario accesible, simplemente nos falta guardar los nuevos valores dentro del producto elegido.
+Para esto, necesitamos solamente un método más que reciba los datos y los procese.
+
+```php
+public function update(Request $request, $id) {
+    $product = \App\Product::find($id);
+    $category = \App\Category::find($request->input('category_id'));
+
+    $product->name = $request->input('name');
+    $product->cost = $request->input('cost');
+    $product->profit_margin = $request->input('profit_margin');
+    $product->category()->associate($category);
+    $product->save();
+
+    $product->properties()->sync($request->input('properties'));
+
+    return redirect('/productos/' . $id);
+}
+```
+> Recibimos por parametros el `Request` y el `id` para poder traer los datos necesarios de la base de datos y actualizar todos y cada uno de los datos manualmente con los nuevos valores.
+
 
 Continuará...
 

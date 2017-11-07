@@ -8,8 +8,9 @@
 <body>
     <div class="container">
         <h1>Editando: {{$product->name}}</h1>
-        <form class="col-md-5" action="/productos/agregar" method="post">
+        <form class="col-md-5" action="/productos/{{$product->id}}" method="post">
             {{ csrf_field() }}
+            {{ method_field('patch') }}
             <div class="form-group">
                 <label for="name">Nombre</label>
                 <input type="text" name="name" id="name" value="{{$product->name}}" class="form-control">
@@ -38,7 +39,7 @@
             </div>
             <div class="form-group">
                 <label for="profit_margin">Margen de Ganancia</label>
-                <input type="text" name="profit_margin" id="profit_margin" value="{{$product->name}}" class="form-control">
+                <input type="text" name="profit_margin" id="profit_margin" value="{{$product->profit_margin}}" class="form-control">
                 @if ($errors->has('profit_margin'))
                     <div class="alert alert-danger">
                         <ul>

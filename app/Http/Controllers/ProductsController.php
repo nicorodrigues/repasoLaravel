@@ -86,6 +86,21 @@ class ProductsController extends Controller
         return view('products.edit', $variables);
     }
 
+    public function update(Request $request, $id) {
+        $product = \App\Product::find($id);
+        $category = \App\Category::find($request->input('category_id'));
+
+        $product->name = $request->input('name');
+        $product->cost = $request->input('cost');
+        $product->profit_margin = $request->input('profit_margin');
+        $product->category()->associate($category);
+        $product->save();
+
+        $product->properties()->sync($request->input('properties'));
+
+        return redirect('/productos/' . $id);
+    }
+
     public function destroy($id) {
         $product = \App\Product::find($id);
 

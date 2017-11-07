@@ -12,6 +12,15 @@ composer create-project laravel/laravel repaso
 ---
 ##**Descargamos la base de datos**
 http://repaso.nicorodrigues.com.ar/repaso.sql
+
+---
+##**Configurar el proyecto de github (opcional)**
+> git clone https://github.com/nicorodrigues/repasoLaravel
+> cd repasoLaravel
+> composer install
+> cp .env.example .env
+> php artisan key:generate
+
 ---
 ##**Configuramos el proyecto**
 Intentamos levantar el servidor para ver si no hubo problemas

@@ -72,6 +72,20 @@ class ProductsController extends Controller
         return redirect('/productos');
     }
 
+    public function edit($id) {
+        $product = \App\Product::find($id);
+        $categories = \App\Category::all();
+        $properties = \App\Property::all();
+
+        $variables = [
+            'product' => $product,
+            'categories' => $categories,
+            'properties' => $properties,
+        ];
+
+        return view('products.edit', $variables);
+    }
+
     public function destroy($id) {
         $product = \App\Product::find($id);
 

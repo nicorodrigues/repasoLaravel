@@ -1106,6 +1106,41 @@ public function update(Request $request, $id) {
 ```
 > Recibimos por parametros el `Request` y el `id` para poder traer los datos necesarios de la base de datos y actualizar todos y cada uno de los datos manualmente con los nuevos valores.
 
+## **Autenticación (Auth)**
+Ya podemos crear, ver, editar y eliminar productos... Pero de qué nos sirve todo esto sin usuarios?
+
+Para solucionar este problema, tenemos la ayuda de Laravel, que como siempre, nos hace la vida fácil...
+
+Si queremos crear un sistema de autenticación, lo único que tenemos que hacer es escribir en consola el siguiente comando:
+
+```bash
+php artisan make:auth
+```
+> Este comando nos crea las rutas, vistas y controladores necesarios para nuestro sistema de usuarios.
+
+### **Rutas**
+Empecemos viendo las rutas que nos regala Laravel:
+
+```php
+// Authentication Routes...
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('login', 'Auth\LoginController@login');
+Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+
+// Registration Routes...
+Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('register');
+Route::post('register', 'Auth\RegisterController@register');
+
+// Password Reset Routes...
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset');
+```
+
+> Si bien en el web.php solo vamos a ver `Auth::Routes()`, esa linea sola contiene todas las rutas de arriba. Si quisieramos modificar alguna, simplemente la ponemos debajo de `Auth::Routes()` y va a pisar la correspondiente.
+> Por ejemplo, si quisieramos pasar /register a /registro pondríamos lo siguiente:
+> Route::get('registro', 'Auth\RegisterController@showRegistrationForm')->name('register');
 
 Continuará...
 

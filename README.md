@@ -882,10 +882,10 @@ public function store(Request $request) {
 
 De esta forma ya tenemos nuestro sistema completo. Podemos agregar y ver productos con sus categorías y propiedades correspondientes!
 
-##**Eliminación de datos**
+## **Eliminación de datos**
 Ahora que tenemos la posibilidad de crear y ver productos. Qué pasa si queremos eliminarlos?
 
-###**Uno a Muchos**
+### **Uno a Muchos**
 Ambos sistemas de relaciones se manejan de formas diferentes, las relaciones de unos a muchos son relativamente fácil de eliminar.
 
 Como siempre, empezamos por crear la ruta!
@@ -941,7 +941,7 @@ Para poder usar el método `delete`, vamos a modificar nuestra ruta `show` de fo
 
 > Como se ve, para trabajar con métodos fuera de `get` y `post`, tenemos que mandar un formulario a través de `post` y agregarle, primero el `csrf_field` como siempre y además una nueva función llamada `method_field` al cual le pasamos como parámetro el verdadero método que queremos utilizar.
 
-###**Muchos a Muchos**
+### **Muchos a Muchos**
 Ahora... tenemos un problema...
 Si nosotros eliminamos un producto que tiene propiedades, estas propiedades no se eliminan.
 Qué podemos hacer para modificar esto?

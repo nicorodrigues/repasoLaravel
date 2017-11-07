@@ -971,18 +971,20 @@ Route::get('/productos/{id}/edit', 'ProductsController@edit');
 Route::patch('/productos/{id}', 'ProductsController@update');
 ```
 
-### **Uno a Muchos**
-
 Como vimos con la eliminación de datos, no hay mucha diferencia del proceso entre las diferentes relaciones.
 
 Veamos como modificar datos en una relación de uno a muchos, arrancando por el método que nos va a devolver la vista con el formulario de edición:
 
 ```php
 public function edit($id) {
-    $producto = \App\Product::find($id);
+    $product = \App\Product::find($id);
+    $categories = \App\Category::all();
+    $properties = \App\Property::all();
 
     $variables = [
-        'producto' => $producto,
+        'product' => $product,
+        'categories' => $categories,
+        'properties' => $properties,
     ];
 
     return view('products.edit', $variables);
@@ -1078,7 +1080,8 @@ Tomemos de referencia nuestro formulario de creación pero lo alteramos un poco
 </html>
 
 ```
-> Como se ve, hay muchísimos cambios en el formulario de edición pero no son nada complicados. Lo que hacemos por ejemplo en la sección de categorías es dentro del foreach controlar que el 
+> Como se ve, hay muchísimos cambios en el formulario de edición pero no son nada complicados. Lo que hacemos por ejemplo en la sección de categorías es dentro del `foreach` controlar cual es la categoría que tenemos seteada en el producto y la marcamos.
+> En el caso de las propiedades, evaluamos cada `checkbox` para saber si está entre las propiedades del producto. De ser así, las imprimimos como `checked`.
 
 Continuará...
 

@@ -71,4 +71,13 @@ class ProductsController extends Controller
 
         return redirect('/productos');
     }
+
+    public function destroy($id) {
+        $product = \App\Product::find($id);
+
+        $product->properties()->sync([]);
+        $product->delete();
+
+        return redirect('/productos');
+    }
 }

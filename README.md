@@ -882,6 +882,84 @@ public function store(Request $request) {
 
 De esta forma ya tenemos nuestro sistema completo. Podemos agregar y ver productos con sus categorías y propiedades correspondientes!
 
+##**Eliminación de datos**
+Ahora que tenemos la posibilidad de crear y ver productos. Qué pasa si queremos eliminarlos?
+
+###**Uno a Muchos**
+Ambos sistemas de relaciones se manejan de formas diferentes, las relaciones de unos a muchos son relativamente fácil de eliminar.
+
+Como siempre, empezamos por crear la ruta!
+
+```php
+Route::delete('/productos/{id}', 'ProductsController@destroy');
+```
+
+> Hay algo que llama la atención, tenemos un `delete` como método en la ruta. Esto es uno de los nuevos métodos de envío que vamos a usar en Laravel.
+> Si bien `delete` sigue siendo `post`, Laravel sabe distinguirlo de un `post` común.
+
+Sigamos por crear el controlador:
+
+```php
+public function destroy($id) {
+    $product = \App\Product::find($id);
+
+    $product->delete();
+
+    return redirect('/productos');
+}
+```
+
+Para poder usar el método `delete`, vamos a modificar nuestra ruta `show` de forma que nos permita borrar un producto que querramos.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{$product->name}}</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+    <h1>{{$product->name}}</h1>
+    <p>{{$product->cost}}</p>
+    <p>{{$product->getPrice()}}</p>
+    <p>{{$category->name}}</p>
+    <p>Propiedades:</p>
+    <ul>
+        @foreach ($properties as $property)
+            <li>{{$property->name}}</li>
+        @endforeach
+    </ul>
+    <form action="/productos/{{$product->id}}" method="post">
+        {{ csrf_field() }}
+        {{ method_field('delete') }}
+        <button type="submit">Borrar</button>
+    </form>
+</body>
+</html>
+```
+
+> Como se ve, para trabajar con métodos fuera de `get` y `post`, tenemos que mandar un formulario a través de `post` y agregarle, primero el `csrf_field` como siempre y además una nueva función llamada `method_field` al cual le pasamos como parámetro el verdadero método que queremos utilizar.
+
+###**Muchos a Muchos**
+Ahora... tenemos un problema...
+Si nosotros eliminamos un producto que tiene propiedades, estas propiedades no se eliminan.
+Qué podemos hacer para modificar esto?
+
+Simplemente vamos a la función `destroy` y agregamos una linea:
+
+```php
+public function destroy($id) {
+    $product = \App\Product::find($id);
+
+    $product->properties()->sync([]);
+    $product->delete();
+
+    return redirect('/productos');
+}
+```
+> Simplemente agregando el `sync()` con un array vacío, Laravel se encarga de eliminar las propiedades correspondientes.
+
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻

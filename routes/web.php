@@ -17,3 +17,5 @@ Route::get('/productos', 'ProductsController@index');
 Route::get('/productos/agregar', 'ProductsController@create');
 Route::post('/productos/agregar', 'ProductsController@store');
 Route::get('/productos/{id}', 'ProductsController@show');
+
+Route::delete('/productos/{id}', 'ProductsController@destroy');

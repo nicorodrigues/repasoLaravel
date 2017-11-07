@@ -10,6 +10,9 @@ composer create-project laravel/laravel repaso
 >Tengamos en cuenta que este comando, va a crear una carpeta dentro de la carpeta donde estemos trabajando actualmente. Por ejemplo, si estamos en la carpeta `php` y creamos el proyecto `repaso`, se va a crear la carpeta `repaso` dentro de `php` que es donde vamos a trabajar.
 
 ---
+##**Descargamos la base de datos**
+http://repaso.nicorodrigues.com.ar/repaso.sql
+---
 ##**Configuramos el proyecto**
 Intentamos levantar el servidor para ver si no hubo problemas
 
@@ -873,12 +876,3 @@ De esta forma ya tenemos nuestro sistema completo. Podemos agregar y ver product
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻
-
-
-##**Eliminación de datos**
-Ahora que tenemos la posibilidad de crear y ver productos. Qué pasa si queremos eliminarlos?
-
-###**Uno a Muchos**
-Ambos sistemas de relaciones se manejan de formas diferentes, las relaciones de unos a muchos son relativamente fácil de eliminar.
-
-Vamos al controlador

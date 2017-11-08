@@ -389,7 +389,7 @@ public function store(Request $request) {
 
 Si tenemos un error en nuestra validación, Laravel se encarga de volvernos al formulario y entregarnos los errores en una variable llamada casualmente `$errors`, lo que nos queda es encargarnos de mostrar sus contenidos! Para esto, vamos a modificar el formulario que teníamos:
 
->agregar.blade.php
+>create.blade.php
 ```html
 <form class="col-md-5" action="/productos/agregar" method="post">
 	{{ csrf_field() }}

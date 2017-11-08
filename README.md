@@ -1152,9 +1152,9 @@ En este momento tenemos 5 vistas nuevas creadas:
 > home.blade.php
 
 Estas vistas están repartidas en diferentes carpetas.
-- auth contiene las vistas de login / register / carpeta passwords.
-- passwords que se encuentra dentro de auth, contiene las dos vistas de recuperación de contraseña que nos proveé Laravel (más adelante vemos como usarlas).
-- views que es la carpeta principal de vistas, contiene la última vista, que es la pantalla que vemos una vez que estamos logueados.
+- `auth` contiene las vistas de `login` / `register` / `carpeta passwords`.
+- `passwords` que se encuentra dentro de `auth`, contiene las dos vistas de recuperación de contraseña que nos proveé Laravel (más adelante vemos como usarlas).
+- `views` que es la carpeta principal de vistas, contiene la última vista, que es la pantalla que vemos una vez que estamos logueados.
 
 Continuará...
 

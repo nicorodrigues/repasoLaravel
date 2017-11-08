@@ -1142,6 +1142,20 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 > Por ejemplo, si quisieramos pasar /register a /registro pondríamos lo siguiente:
 > Route::get('registro', 'Auth\RegisterController@showRegistrationForm')->name('register');
 
+### **Vistas**
+Tenemos MUCHAS rutas preparadas, todas apuntando a un controlador. Esperemos un poco más antes de verlos, por ahora vayamos a las vistas.
+En este momento tenemos 5 vistas nuevas creadas:
+> auth\login.blade.php
+> auth\register.blade.php
+> auth\passwords\email.blade.php
+> auth\passwords\reset.blade.php
+> home.blade.php
+
+Estas vistas están repartidas en diferentes carpetas.
+- auth contiene las vistas de login / register / carpeta passwords.
+- passwords que se encuentra dentro de auth, contiene las dos vistas de recuperación de contraseña que nos proveé Laravel (más adelante vemos como usarlas).
+- views que es la carpeta principal de vistas, contiene la última vista, que es la pantalla que vemos una vez que estamos logueados.
+
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻

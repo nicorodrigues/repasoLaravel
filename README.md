@@ -1162,19 +1162,19 @@ Estas vistas están repartidas en diferentes carpetas.
 
 No vamos a meternos muy adentro en las especificaciones de cada vista, pero veamos un resumen de cada una:
 
-#### **auth\login.blade.php**
+#### **- auth\login.blade.php**
 Esta vista nos permite simplemente loguearnos a nuestro sitio web utilizando nuestro `email` y `password`.
 
-#### **auth\register.blade.php**
+#### **- auth\register.blade.php**
 Esta vista nos permite registrarnos a nuestro sitio web, completando los campos `name`, `email`, `password` y `password_confirmation`.
 
-#### **auth\passwords\email.blade.php**
+#### **- auth\passwords\email.blade.php**
 Esta es la vista que nos permite ingresar el correo para recuperar nuestro `password` via `email`.
 
-#### **auth\passwords\reset.blade.php**
+#### **- auth\passwords\reset.blade.php**
 A diferencia de la vista anterior, esta es la vista que nos permite realizar el cambio de contraseña después de acceder al link recibido en el mail que se envió desde `auth\email.blade.php`
 
-#### **home.blade.php**
+#### **- home.blade.php**
 La última vista, esta hecha para mostrar como podemos controlar las sesiones desde Laravel, es decir, solo podemos acceder a ella si estamos logueados. Si nos logueamos, nos redirige automáticamente a la vista.
 
 Entiendo, entiendo, es un tema complicado... Vale la pena entender qué es lo que hace cada una de las vistas ya que nos sirven de ejemplo para modificarlas o incluso crear las nuestras propias.

@@ -11,7 +11,11 @@ composer create-project laravel/laravel repaso
 
 ---
 ## **Descargamos la base de datos**
+#### **Base de datos sin campo DNI**
 http://repaso.nicorodrigues.com.ar/repaso.sql
+
+#### **Base de datos con campo DNI**
+http://repaso.nicorodrigues.com.ar/repasoConDni.sql
 
 ---
 ## **Configurar el proyecto de github (opcional)**
@@ -1133,9 +1137,9 @@ Route::get('register', 'Auth\RegisterController@showRegistrationForm')->name('re
 Route::post('register', 'Auth\RegisterController@register');
 
 // Password Reset Routes...
-Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm');
-Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail');
-Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm');
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
 Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 ```
 
@@ -1237,6 +1241,50 @@ Agreguemos primero el campo a la vista!
     </div>
 </div>
 ```
+
+Tenemos el campo, vamos por el controlador!
+
+En el controlador tenemos que modificar 2 métodos, agregandole lo necesario sobre nuestro campo:
+> Auth\RegisterController.php
+```php
+protected function validator(array $data)
+{
+    return Validator::make($data, [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        'dni' => 'required|numeric|between:1,100000000'
+    ]);
+}
+```
+
+```php
+protected function create(array $data)
+{
+    return User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => bcrypt($data['password']),
+        'dni' => $data['dni']
+    ]);
+}
+```
+
+Con el controlador ya modificado, nos vamos para el modelo!
+
+> User.php
+```php
+protected $fillable = [
+    'name', 'email', 'password', 'dni'
+];
+```
+> Hacemos esto para permitirle a la función create, modificar la columna `dni` de la base de datos.
+
+Por último, y más importante, hay que agregarle la columna a la tabla de la base de datos!!
+(como yo se que hay conocimiento que se sabe de memoria, obviamente, no voy a explicar esa parte).
+
+
+
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻

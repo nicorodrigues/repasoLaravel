@@ -1106,6 +1106,7 @@ public function update(Request $request, $id) {
 ```
 > Recibimos por parametros el `Request` y el `id` para poder traer los datos necesarios de la base de datos y actualizar todos y cada uno de los datos manualmente con los nuevos valores.
 
+---
 ## **Autenticación (Auth)**
 Ya podemos crear, ver, editar y eliminar productos... Pero de qué nos sirve todo esto sin usuarios?
 

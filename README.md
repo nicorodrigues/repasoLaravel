@@ -1144,18 +1144,98 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset');
 
 ### **Vistas**
 Tenemos MUCHAS rutas preparadas, todas apuntando a un controlador. Esperemos un poco más antes de verlos, por ahora vayamos a las vistas.
+
 En este momento tenemos 5 vistas nuevas creadas:
-> auth\login.blade.php
-> auth\register.blade.php
-> auth\passwords\email.blade.php
-> auth\passwords\reset.blade.php
-> home.blade.php
+
+```php
+auth\login.blade.php
+auth\register.blade.php
+auth\passwords\email.blade.php
+auth\passwords\reset.blade.php
+home.blade.php
+```
 
 Estas vistas están repartidas en diferentes carpetas.
 - `auth` contiene las vistas de `login` / `register` / `carpeta passwords`.
 - `passwords` que se encuentra dentro de `auth`, contiene las dos vistas de recuperación de contraseña que nos proveé Laravel (más adelante vemos como usarlas).
 - `views` que es la carpeta principal de vistas, contiene la última vista, que es la pantalla que vemos una vez que estamos logueados.
 
+No vamos a meternos muy adentro en las especificaciones de cada vista, pero veamos un resumen de cada una:
+
+#### **auth\login.blade.php**
+Esta vista nos permite simplemente loguearnos a nuestro sitio web utilizando nuestro `email` y `password`.
+
+#### **auth\register.blade.php**
+Esta vista nos permite registrarnos a nuestro sitio web, completando los campos `name`, `email`, `password` y `password_confirmation`.
+
+#### **auth\passwords\email.blade.php**
+Esta es la vista que nos permite ingresar el correo para recuperar nuestro `password` via `email`.
+
+#### **auth\passwords\reset.blade.php**
+A diferencia de la vista anterior, esta es la vista que nos permite realizar el cambio de contraseña después de acceder al link recibido en el mail que se envió desde `auth\email.blade.php`
+
+#### **home.blade.php**
+La última vista, esta hecha para mostrar como podemos controlar las sesiones desde Laravel, es decir, solo podemos acceder a ella si estamos logueados. Si nos logueamos, nos redirige automáticamente a la vista.
+
+Entiendo, entiendo, es un tema complicado... Vale la pena entender qué es lo que hace cada una de las vistas ya que nos sirven de ejemplo para modificarlas o incluso crear las nuestras propias.
+
+### **Controllers**
+Bien, ya tenemos una noción de qué es lo que hacen las vistas, vamos ahora por los controladores correspondientes:
+
+Tenemos 4 controladores nuevos dentro de la carpeta `auth`:
+```php
+Auth\ForgotPasswordController.php
+Auth\LoginController.php
+Auth\RegisterController.php
+Auth\ResetPasswordController.php
+```
+Son pocos, pero tenemos muchas explicaciones para hacer al respecto!
+Arranquemos por explicar como se manejan estos controladores...
+
+Si bien tenemos un controlador para cada una de las 4 mayores vistas nuevas, estos controladores funcionan a través del uso de `traits` (tal vez los recuerden de películas como: `Por dios, cuando se acaba objetos?` o `No entiendo nada, por favor ayuda.`), los cuales permiten que usen funciones declaradas dentro de la carpeta `vendor`, los cuales **NO TENEMOS QUE TOCAR** ya que son cosas que no se comparten entre los diferentes desarrolladores.
+
+La forma correcta de trabajar con estos archivos es por ejemplo, si quisieramos modificar la validación del login, vamos a nuestro `Auth\LoginController.php` y vemos que dice `use AuthenticatesUsers`, lo que quiere decir que está utilizando el `trait` `AuthenticatesUsers`, con una simple busqueda (ctrl + p), vemos que ese trait está en `\vendor\laravel\framework\src\Illuminate\Foundation\Auth\AuthenticatesUsers.php`... COMO???
+
+Ese es el problema con la carpeta vendor, todo nuestro sistema está ahí!! Por eso vamos a modificarlo lo menos posible.
+En este archivo vemos que hay una función que se llama `validateLogin`, la cual recibe un `$request` y genera una validación...
+
+Para modificarla, lo que vamos a hacer es tan simple como copiarla textualmente y pegarla en nuestro `Auth\LoginController.php`, debajo del `__construct` y modificamos lo que querramos. Por ejemplo:
+
+```php
+protected function validateLogin(Request $request)
+{
+    $this->validate($request, [
+        $this->username() => 'required|string',
+        'password' => 'required|string|min:6',
+    ]);
+}
+```
+
+Ahora nuestro `login` requiere que el password tenga al menos 6 caracteres!! Parecía complicado, no?
+De la misma forma que logramos eso, podemos cambiar cualquier tipo de función en los controladores que nos dió el comando `php artisan make:auth`!!
+
+Ahora, qué pasa por ejemplo si quisieramos modificar nuestro registro para agregar campos?
+
+Tenemos un camino de 5 pasos:
+
+Agreguemos primero el campo a la vista!
+
+> auth\register.blade.php
+```php
+<div class="form-group{{ $errors->has('dni') ? ' has-error' : '' }}">
+    <label for="dni" class="col-md-4 control-label">DNI</label>
+
+    <div class="col-md-6">
+        <input id="dni" type="dni" class="form-control" name="dni" required>
+
+        @if ($errors->has('dni'))
+            <span class="help-block">
+                <strong>{{ $errors->first('dni') }}</strong>
+            </span>
+        @endif
+    </div>
+</div>
+```
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻

@@ -1348,7 +1348,9 @@ Las migraciones nos permiten escribir de forma ordenada, los cambios que vamos h
 
 Creémos la base de datos que puse al principio de la guía desde 0:
 
-Empezamos creando la tabla de `products` corriendo el siguiente comando desde una terminal:
+Empezamos creando la base de datos (o schema) desde workbench/terminal con el nombre que querramos.
+
+Después configuramos nuestro .env con la base de datos creada y vamos a crear la migración para la tabla de `products` corriendo el siguiente comando desde una terminal:
 ```bash
 php artisan make:migration create_products_table
 ```
@@ -1488,8 +1490,194 @@ Schema::table('products', function (Blueprint $table) {
 > Lo que hacemos de esta forma es modificar la columna, con el mismo comando que la creariamos, pero agregandole `->change()` al final de la misma.
 > Para la función `down()` hacemos lo contrario a lo que hicimos en `up()`.
 
+## **Factories y Seeders**
 
+Espectacular! Ya tenemos nuestras tablas de la base de datos creadas, ahora necesitamos rellenarlas con datos para poder probar nuestro sistema! Para esto vamos a usar `Seeders` junto a `Factories` y `Faker`. Qué es todo esto?
 
+#### **- Seeders**
+Los seeders son los encargados de decir qué vamos a agregar en la base de datos.
+
+#### **- Factories**
+Las factories se encargan de diseñar (en nuestro caso junto a `faker`) la estructura de un dato que vayamos a generar. Es decir, vamos a decirle a Laravel específicamente como tienen que ser los datos que vayan en la tabla.
+
+#### **- Faker**
+La mejor parte de las factories está en `Faker`. Faker es una librería que nos permite crear datos fictícios con casi cualquier tipo de formato que quisieramos, desde un número al azar hasta párrafos enteros.
+> Para más info sobre qué cosas podemos crear con `Faker` ver el siguiente link: https://github.com/fzaninotto/Faker#formatters
+
+### **Factory**
+Arranquemos por `factory`, así le mostramos a Laravel cómo queremos que sean nuestros productos.
+
+```bash
+php artisan make:factory ProductFactory
+```
+Al correr ese comando vamos a tener un archivo nuevo, al cual vamos a ingresar para agregarle nuestros datos:
+
+> database\factories\ProductFactory.php
+
+```php
+$factory->define(\App\Product::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'cost' => $faker->numberBetween(1, 2000),
+        'profit_margin' => $faker->numberBetween(1, 100),
+    ];
+});
+```
+> Dentro del return, especificamos utilizando el formato `key => value` el nombre de la columna y el contenido que vamos a darle, aplicando `$faker` para generarlo.
+
+Hacemos lo mismo con `Categories` y `Properties`:
+
+#### **- Category**
+```bash
+php artisan make:factory CategoryFactory
+```
+> database\factories\CategoryFactory.php
+
+```php
+$factory->define(\App\Category::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word,
+    ];
+});
+```
+
+#### **- Property**
+
+```bash
+php artisan make:factory PropertyFactory
+```
+> database\factories\PropertyFactory.php
+
+```php
+$factory->define(\App\Property::class, function (Faker $faker) {
+    return [
+        'name' => $faker->word,
+    ];
+});
+```
+
+Ya tenemos todos nuestras `Factory` creadas, pero nunca especificamos los datos de relaciones... Eso es porque eso lo hacemos en nuestros `Seeders`!!
+
+Para los seeders, el camino es el mismo.
+
+Generamos nuestro seeder:
+
+```bash
+php artisan make:factory CategoriesSeeder
+```
+
+Si entramos al archivo creado, podemos ver que tenemos solamente una función, la cual vamos a modificar con nuestro código:
+> database\seeds\CategoriesSeeder.php
+```php
+public function run()
+{
+    factory(\App\Category::class, 5)->create()->each(function ($elem) {
+        $elem->products()->save(factory(App\Product::class)->make());
+    });
+}
+```
+> Arrancamos con un seeder un poco avanzado, para que se vaya viendo las posibilidades de lo que se puede hacer:
+> `factory(\App\Category::class, 5)->create()` nos crea nuestra categoría utilizando la `factory` de `Category`
+> A eso le hacemos le agregamos ->each() que recibe como parametro una función y nos permite correr esa función a cada uno de las categorías creadas.
+> Por último le agregamos a cada uno de nuestros productos, la categoría creada utilizando la siguiente linea:
+> `$elem->products()->save(factory(App\Product::class)->make());` donde $elem es la categoría actual, de ahí llamamos a los productos de esa categoría y le decimos que a esa categoría le agregue un elemento creado dentro del método save utilizando `factory(App\Product::class)->make()`
+> Si nosotros quisieramos crear y agregar más de un solo producto por categoría, bastaría con realizar un `for` dentro de la función que recibe `each` o simplemente repetir la linea `$elem->products()->save(factory(App\Product::class)->make());` más de una vez.
+
+Ya sabemos como crear y seedear una base de datos en Laravel, vamos a realizar los pasos restantes!!
+
+```bash
+php artisan make:seeder PropertiesSeeder
+```
+> database\seeds\PropertiesSeeder.php
+
+```php
+public function run()
+{
+    factory(\App\Property::class, 10)->create();
+}
+```
+
+Y por último:
+
+```bash
+php artisan make:seeder ProductsSeeder
+```
+> database\seeds\ProductsSeeder.php
+
+Para nuestra último `Seeder` vamos a correr un código un tanto complicado:
+
+```php
+public function run()
+{
+    factory(\App\Product::class, 10)->create()->each(function ($elem) {
+        $properties = [];
+        $maxCat = \App\Category::all()->count();
+        $maxProp = \App\Property::all()->count();
+
+        for ($i=0; $i < 3; $i++) {
+            $properties[] = \App\Property::find(rand(1,$maxProp));
+        }
+
+        $properties = collect($properties);
+
+        $elem->category()->associate(\App\Category::find(rand(1, $maxCat)));
+        $elem->save();
+
+        $elem->properties()->sync($properties);
+    });
+}
+```
+> La lógica de arriba es la siguiente:
+> Creamos nuestro producto y con un `each()` le corremos a cada uno, una función.
+
+> Dentro de esta función hacemos varias cosas:
+> - Creamos un `array` dondo vamos a guardar nuestras propiedades
+> - Contamos la cantidad de categorías que tenemos y las guardamos en `$maxCat`
+> - Contamos la cantidad de propiedades que tenemos y las guardamos en `$maxProp`
+> - Corremos un `for` que nos permite cargar a nuestro array de propiedades, 3 propiedades existentes en la base de datos.
+> - Transformamos nuestro array en una collection
+> - Al elemento actual, le cargamos utilizando `associate()` una categoría existente en la base de datos y lo guardamos
+> - Por último, al elemento actual, le sincronizamos todos los tags que agarramos de la base de datos, pero solamente le pasamos sus `id` utilizando la función `pluck()` de eloquent.
+
+Una vez terminado esto, solamente nos falta decirle a Laravel que use estos seeders al momento de llenar la base de datos! Para esto, vamos al archivo `database\seeds\DatabaseSeeder.php` y le agregamos las siguientes lineas en su función `run()`:
+```php
+$this->call(PropertiesSeeder::class);
+$this->call(CategoriesSeeder::class);
+$this->call(ProductsSeeder::class);
+```
+
+Ahora que tenemos nuestros seeders con sus factories y las migraciones creadas, solamente nos falta correrlos!
+
+Vamos a la terminal y escribimos lo siguiente:
+```bash
+php artisan migrate --seed
+```
+> Esto nos corre todas las migraciones y además, una vez terminada la migración, corre nuestros seeders.
+Si quisieramos hacer todo por separado, haríamos lo siguiente:
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+### **Notas finales sobre migración**
+En el caso de que tuvieramos problemas con alguna migración, o simplemente quisieramos volver atrás, podemos utilizar el siguiente comando
+
+```bash
+php artisan migrate:rollback --step 2
+```
+> Este comando nos permite volver atrás nuestras últimas 2 migraciones. Es decir, vamos a ejecutar la funcion `down()` de las últimas 2 migraciones realizadas.
+
+Si por otra parte, quisieramos resetear completamente nuestra base de datos, haríamos lo siguiente:
+```bash
+php artisan migrate:refresh
+```
+
+En la nueva versión de Laravel, tenemos un comando que nos permite **borrar** todas nuestras tablas y correr las migraciones de nuevo, sin utilizar las funciones `down()`:
+```bash
+php artisan migrate:fresh
+```
+Por último, si nosotros quisieramos seedear nuestra base de datos mientras corremos cualquier comando de `migrate`, lo único que deberíamos hacer es agregarle `--seed` al final.
 
 Continuará...
 

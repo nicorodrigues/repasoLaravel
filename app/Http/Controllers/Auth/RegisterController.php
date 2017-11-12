@@ -53,6 +53,7 @@ class RegisterController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'dni' => 'required|numeric|between:1,100000000'
         ]);
+
     }
 
     /**

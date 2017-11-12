@@ -1284,6 +1284,62 @@ Por último, y más importante, hay que agregarle la columna a la tabla de la ba
 (como yo se que hay conocimiento que se sabe de memoria, obviamente, no voy a explicar esa parte).
 
 
+---
+## **Middlewares**
+
+Uno de los conceptos más importantes en Laravel, es el de `middleware`.
+Un `middleware` es una capa de abstracción más entre una ruta y un controlador.
+
+Qué significa esto?
+
+Pongamos como ejemplo la edición de un producto. Nosotros ya tenemos el sistema que permite la edición de un producto, pero que pasaría si quisieramos que una vez subido un producto, el único que tuviera acceso a la vista de edición fuese el administrador?
+Ahí es donde entran los `middleware`. Estos nos dejan compartir funcionalidad entre las diferentes rutas, por ejemplo una barrera que se fija si sos el administrador o sos un usuario común; si sos un administrador, seguís de largo, si sos un usuario, volvés al home!
+
+Para crear un middleware que controle el rol de nuestro usuario, ponemos el siguiente comando:
+```bash
+php artisan make:middleware CheckName
+```
+Esto nos va a generar un archivo en la carpeta `App\Http\Middleware` llamado `CheckName`. Este archivo ya viene con código, vamos a analizar el único método que tiene mientras le agregamos nuestro propio código:
+
+```php
+public function handle($request, Closure $next, $name)
+{
+    if (\Auth::check() && \Auth::user()->name === $name) {
+        return $next($request);
+    }
+
+    return redirect('/');
+}
+```
+> Nos preparamos el middleware agregandole un parámetro más, llamado `$name` y luego checkeamos a través de un `if`, si el usuario está logueado y si el nombre recibido es el mismo al que tiene el usuario. De ser así, va a correr la linea `return $next($request);`. Esta linea permite que el flujo siga, en cambio, si no fuera el nombre que esperamos, lo redirigimos a la ruta `'/'`.
+
+Ya tenemos el código del middleware, ahora tenemos que registrarlo en el `Kernel`, esto nos va a permitir acceder al middleware desde las diferentes rutas.
+
+> app\Http\kernel.php
+
+En este archivo vamos a tener 3 tipos diferentes de formas de llamar a un `middleware`.
+#### **- protected $middleware**
+En este `array`, llamamos a los `middleware` que queremos que corran en TODAS las rutas, sin importar cual sea.
+
+#### **- protected $middlewareGroups**
+A diferencia del primer `array`, acá empezamos a especificarnos. Este es un `array de arrays asociativos`. La `key` que le pongamos al `array asociativo` va a ser el nombre por el cual vamos a utilizar los `middleware` contenidos.
+
+#### **- protected $routeMiddleware**
+Este es el `array` que vamos a utilizar. Acá definimos en la `key` la forma en la cual queremos llamar a nuestro `middleware` y en el `value` ponemos la ruta del mismo.
+
+En nuestro caso, usamos la tercera forma, para ser más específicos agregando la siguiente linea al array `$routeMiddleware`:
+```php
+'checkname' => \App\Http\Middleware\CheckName::class,
+```
+
+Bien, ya tenemos la configuración hecha... Ahora, cómo los usamos?
+
+Vamos a la ruta a la cual queremos ponerselo, en este caso queremos evitar que puedan editar los usuarios:
+
+```php
+Route::get('/productos/{id}/edit', 'ProductsController@edit')->middleware('checkname:admin');
+```
+> Podemos ver que le agregamos a la ruta el `middleware` utilizando `->middleware()` a la vez que le pasamos por parámetro `checkname:admin`. Qué es esto? `checkname` es el nombre que pusimos en el archivo `kernel.php` y al ponerle :admin le estamos pasando por parámetro la palabra `admin` que luego, se va a guardar en la variable `$name` dentro del `middleware`.
 
 Continuará...
 

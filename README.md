@@ -1341,6 +1341,156 @@ Route::get('/productos/{id}/edit', 'ProductsController@edit')->middleware('check
 ```
 > Podemos ver que le agregamos a la ruta el `middleware` utilizando `->middleware()` a la vez que le pasamos por parámetro `checkname:admin`. Qué es esto? `checkname` es el nombre que pusimos en el archivo `kernel.php` y al ponerle :admin le estamos pasando por parámetro la palabra `admin` que luego, se va a guardar en la variable `$name` dentro del `middleware`.
 
+---
+## **Migrations**
+Ya vimos que Laravel nos hace la vida más fácil en todo sentido, por qué no agregar a la lista la creación de base de datos?
+Las migraciones nos permiten escribir de forma ordenada, los cambios que vamos haciendo en la base de datos (creación de tablas, agregado de columnas, modificación de campos, etc). Para esto vamos a crear (idealmente) un archivo por cada cambio que fuesemos a hacerle a nuestra base de datos.
+
+Creémos la base de datos que puse al principio de la guía desde 0:
+
+Empezamos creando la tabla de `products` corriendo el siguiente comando desde una terminal:
+```bash
+php artisan make:migration create_products_table
+```
+> Con ese comando estamos siguiendo la convención de `Laravel` sobre como crear migraciones de creación de tablas, poniendo de nombre `create_nombredetabla_table` ya nos genera las funciones necesarias para trabajar, que simplemente tenemos que modificar.
+
+Dentro de toda migración vamos a encontrar 2 funciones:
+
+#### **- up()**
+En la función `up()` vamos a poner la estructura que queremos crear, siempre utilizando la clase `Schema`:
+
+```php
+Schema::create('products', function (Blueprint $table) {
+    $table->increments('id');
+    $table->string('name', 191);
+    $table->string('image', 191)->nullable();
+    $table->tinyInteger('active')->default(1);
+    $table->double('cost', 8, 2);
+    $table->double('profit_margin', 5, 2);
+    $table->tinyInteger('category_id')->nullable();
+    $table->timestamps();
+});
+```
+> Como estamos CREANDO una tabla, utilizamos la función `create` que recibe como parametros el nombre de la tabla a crear y una función que a su vez recibe `Blueprint $table`, donde vamos a escribir nuestros campos de la tabla de la siguiente forma:
+> `$table->tipodedato('nombredecolumna')`;
+> Podemos concatenarle más modificadores, para ver una lista completa de todo, se puede usar el siguiente link: https://laravel.com/docs/5.5/migrations#columns
+
+
+#### **- down()**
+En la función `down()` nosotros vamos a decirle a Laravel como revertir el proceso hecho en `up()`, para que cuando quisieramos volver atrás una migración, lo podamos hacer de forma sencilla:
+
+```php
+Schema::dropIfExists('products');
+```
+
+> En este caso, lo que hacemos es eliminar la tabla `products` si es que existe.
+
+De esa forma creamos las tablas restantes:
+
+### **Categories**
+```bash
+php artisan make:migration create_categories_table
+```
+#### **- up()**
+```php
+Schema::create('categories', function (Blueprint $table) {
+    $table->increments('id');
+    $table->string('name', 191);
+    $table->tinyInteger('active')->default(1);
+    $table->timestamps();
+});
+```
+#### **- down()**
+```php
+Schema::dropIfExists('categories');
+```
+### **Properties**
+```bash
+php artisan make:migration create_properties_table
+```
+#### **- up()**
+```php
+Schema::create('properties', function (Blueprint $table) {
+    $table->increments('id');
+    $table->string('name', 191);
+    $table->tinyInteger('active')->default(1);
+    $table->timestamps();
+});
+```
+#### **- down()**
+```php
+Schema::dropIfExists('properties');
+```
+
+### **product_property**
+Con la tabla `product_property` es un poco diferente, ya que vamos a estar creando una tabla de relaciones:
+
+```bash
+php artisan make:migration create_product_property_table
+```
+
+#### **- up()**
+```php
+Schema::create('product_property', function (Blueprint $table) {
+    $table->integer('product_id')->nullable()->unsigned();
+    $table->integer('property_id')->nullable()->unsigned();
+
+    $table->foreign('product_id')->references('id')->on('products');
+    $table->foreign('property_id')->references('id')->on('properties');
+});
+```
+> Solo necesitamos dos campos, ya que vamos a usar esta tabla para relacionar productos con propiedades. Lo que hacemos además es crear las relaciones utilizando la siguiente lógica:
+> `$table->foreign('nombredetablaensingular_id')->references('id')->on('nombredetabla');`
+> Tenemos que asegurarnos que los dos campos `product_id` y `property_id` sean del tipo exacto que sea el campo de `id` original.
+
+
+#### **- down()**
+```php
+Schema::dropIfExists('product_property');
+```
+
+Tenemos las tablas creadas... Pero hay un problema! Nos olvidamos de ponerle la relación al campo `category_id` de la tabla `products`. No hay que desesperar, podemos hacerlo con una migración más, para modificar la tabla!
+
+```bash
+php artisan make:migration add_relation_to_products_table
+```
+Si bien tenemos la migración creada, esta vez vamos a escribir el código un poco diferente:
+
+#### **- up()**
+```php
+Schema::table('products', function (Blueprint $table) {
+    $table->foreign('category_id')->references('id')->on('categories');
+});
+```
+#### **- down()**
+```php
+Schema::dropForeign('products_category_id_foreign');
+```
+
+Ahora sí tenemos toda la estructura de base de datos creada.
+Ahora, solo a base de ejemplo, no voy a aplicar esta migración en el cóðigo, pero dejo una muestra de como sería una migración para modificar el largo de la columna name:
+
+```bash
+php artisan make:migration alter_name_column_products
+```
+#### **- up()**
+```php
+Schema::table('products', function (Blueprint $table) {
+    $table->string('name', 160)->change();
+});
+```
+#### **- down()**
+```php
+Schema::table('products', function (Blueprint $table) {
+    $table->string('name', 191)->change();
+});
+```
+> Lo que hacemos de esta forma es modificar la columna, con el mismo comando que la creariamos, pero agregandole `->change()` al final de la misma.
+> Para la función `down()` hacemos lo contrario a lo que hicimos en `up()`.
+
+
+
+
 Continuará...
 
 ┻━┻︵  \(°□°)/ ︵ ┻━┻

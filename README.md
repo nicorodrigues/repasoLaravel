@@ -1563,7 +1563,7 @@ Para los seeders, el camino es el mismo.
 Generamos nuestro seeder:
 
 ```bash
-php artisan make:factory CategoriesSeeder
+php artisan make:seeder CategoriesSeeder
 ```
 
 Si entramos al archivo creado, podemos ver que tenemos solamente una función, la cual vamos a modificar con nuestro código:
@@ -1576,6 +1576,17 @@ public function run()
     });
 }
 ```
+
+Si quisieramos hacer más de uno por categoría:
+```php
+public function run()
+{
+    factory(\App\Category::class, 5)->create()->each(function ($elem) {
+        $elem->products()->saveMany(factory(App\Product::class, 5)->make());
+    });
+}
+```
+
 > Arrancamos con un seeder un poco avanzado, para que se vaya viendo las posibilidades de lo que se puede hacer:
 > `factory(\App\Category::class, 5)->create()` nos crea nuestra categoría utilizando la `factory` de `Category`
 > A eso le hacemos le agregamos ->each() que recibe como parametro una función y nos permite correr esa función a cada uno de las categorías creadas.

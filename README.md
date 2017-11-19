@@ -1369,7 +1369,7 @@ Schema::create('products', function (Blueprint $table) {
     $table->tinyInteger('active')->default(1);
     $table->double('cost', 8, 2);
     $table->double('profit_margin', 5, 2);
-    $table->tinyInteger('category_id')->nullable();
+    $table->integer('category_id')->nullable()->unsigned();
     $table->timestamps();
 });
 ```
@@ -1466,7 +1466,9 @@ Schema::table('products', function (Blueprint $table) {
 ```
 #### **- down()**
 ```php
-Schema::dropForeign('products_category_id_foreign');
+Schema::table('products', function (Blueprint $table) {
+    $table->dropForeign('posts_user_id_foreign');
+});
 ```
 
 Ahora sí tenemos toda la estructura de base de datos creada.
@@ -1689,6 +1691,147 @@ En la nueva versión de Laravel, tenemos un comando que nos permite **borrar** t
 php artisan migrate:fresh
 ```
 Por último, si nosotros quisieramos seedear nuestra base de datos mientras corremos cualquier comando de `migrate`, lo único que deberíamos hacer es agregarle `--seed` al final.
+
+---
+## **Storage**
+Upa, ya tenemos todo armado... Ah, no... NOS FALTAN LAS FOTOS!
+Para empezar, si quisieramos guardar cosas en Laravel, lo recomendable es correr el comando que vamos a ver a continuacion para generar un `soft link`. Qué es esto? Simple, nos genera un acceso directo a otra carpeta. De esta forma acceder a archivos que físicamente pueden o no estar en nuestra carpeta public, como si lo estuvieran.
+
+Corremos el siguiente comando en la terminal:
+```bash
+php artisan storage:link
+```
+
+Si van a la carpeta `public`, ahora tenemos una nueva carpeta llamada `storage`, la cual realmente es un acceso directo a la verdadera carpeta `storage/app/public`.
+
+Propongamonos ahora guardar una foto en nuestros productos. Para esto, necesitaríamos otra columna en nuestra tabla de productos... Creémos una migración!!
+
+```bash
+php artisan make:migration add_fotopath_to_products_table
+```
+Le agregamos funcionalidad a la migración:
+
+
+#### **- Up()**
+```php
+Schema::table('products', function (Blueprint $table) {
+    $table->string('fotopath')->nullable();
+});
+```
+
+#### **- Down()**
+```php
+Schema::table('products', function (Blueprint $table) {
+    $table->dropColumn('fotopath');
+});
+```
+
+Como último paso, corremos la migración poniendo en consola el siguiente comando!
+
+```bash
+php artisan migrate
+```
+
+Ya con los pasos hechos hasta ahora tenemos la base de datos preparada para que nuestros productos tengan imágenes... Lo que nos falta es subirlas!!!
+
+Arranquemos agreguemosle a nuestra vista de creación de productos lo necesario para que se pueda subir una imagen junto a los datos:
+
+Arranquemos por modificar el `<form>` para que efectivamente envíe archivos:
+```html
+<form class="col-md-5" action="/productos/agregar" method="post" enctype="multipart/form-data">
+```
+> Al agregarle `enctype="multipart/form-data"` le estamos diciendo a nuestro formulario, que aparte de enviar texto plano, va a estar enviando archivos.
+
+Ya tenemos el formulario preparado, vamos a agregarle el campo de selección de imagen:
+
+```php
+<div class="form-group">
+    <label for="fotoPath">Imagen</label>
+    <input type="file" name="fotoPath" id="fotoPath" class="form-control">
+    @if ($errors->has('fotoPath'))
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->get('fotoPath') as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+</div>
+```
+
+Perfecto! Ya tenemos el sistema preparado para enviar imagenes... Ahora a recibirlas!
+
+Arrancamos adaptando nuestro `fillable` para que podamos guardar el path en nuestra tabla:
+
+> app/Product.php
+```php
+protected $fillable = ['name', 'cost', 'profit_margin', 'category_id', 'fotopath'];
+```
+
+Modifiquemos el método `store` de nuestro `ProductsController`.
+
+```php
+public function store(Request $request) {
+    $rules = [
+        "name" => "required|unique:products",
+        "cost" => "required|numeric",
+        "profit_margin" => "required|numeric",
+        "category_id" => "required|numeric|between:1,3"
+    ];
+
+    $messages = [
+        "required" => "El :attribute es requerido!",
+        "unique" => "El :attribute tiene que ser único!",
+        "numeric" => "El :attribute tiene que ser numérico!",
+        "between" => "El :attribute tiene que estar entre :min y :max."
+    ];
+
+    $request->validate($rules, $messages);
+
+    $extensionImagen = $request->file('fotoPath')->getClientOriginalExtension();
+
+    $fotoPath = $request->file('fotoPath')->storeAs('productos', uniqid() . "." . $extensionImagen, 'public');
+
+    $product = \App\Product::create([
+        'name' => $request->input('name'),
+        'cost' => $request->input('cost'),
+        'profit_margin' => $request->input('profit_margin'),
+        'fotopath' => $fotoPath
+    ]);
+
+    $category = \App\Category::find($request->input('category_id'));
+
+    $product->properties()->sync($request->input('properties'));
+    $product->category()->associate($category);
+    $product->save();
+
+    return redirect('/productos');
+}
+```
+> Ya que nuestro producto va a tener imagen de forma opcional, no le hacemos una validación. Simplemente le agregamos las siguientes lineas:
+>
+> `$extensionImagen = $request->file('fotoPath')->getClientOriginalExtension();`
+> `$fotoPath = $request->file('fotoPath')->storeAs('productos', $request->name . "." . $extensionImagen, 'public');`
+>
+> En la primera linea guardamos la extensión de la imagen subida para utilizarla luego en la función `storeAs`.
+> Para guardar nuestro archivo, primero creamos una variable donde finalmente vamos a tener el `path` llmada `$fotoPath`. Empezamos por agarrar nuestro archivo `$request->file('fotoPath')`, a esto le concatenamos la función `storeAs('productos', $request->name . "." . $extensionImagen, 'public');`
+> A la función le agregamos parametros en este orden:
+> `'productos'` es la carpeta donde se va a guardar nuestra imagen
+> `$request->id . "." . $extensionImagen` es el nombre con el cual vamos a guardar nuestro archivo, en este caso le pusimos la funcion `uniqid()` que nos genera un `string` único y su extensión original, con un . en el medio para que mantenga su formato de archivo.
+> `'public'` es el nombre del lugar donde va a estar guardado nuestro, generalmente se pone 'public'
+
+Ya podemos guardar fotos en nuestros productos! Pero ahora... cómo las vemos?
+
+Vamos a la vista donde podemos ver productos específicos y le agregamos la siguiente linea donde querramos:
+
+> products/show.blade.php
+```php
+<img src="{{ asset('storage/' . $product->fotopath) }}" alt="">
+```
+> Utilizando la función `asset()` generamos una URL hacia nuestra imagen. Le pasamos como parámetro la ubicación de nuestro archivo, en este caso lo tenemos en nuestra base de datos: `$product->fotopath`. El problema está en que ese no es el path que utilizamos para recuperarla, sino que tenemos que agregarle `'storage/'` antes, para que podamos acceder correctamente.
+
+De esta forma ya tenemos nuestro sistema de imagenes totalmente funcional!!!
 
 Continuará...
 

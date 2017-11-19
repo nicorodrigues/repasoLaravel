@@ -20,7 +20,7 @@ class CreateProductsTable extends Migration
             $table->tinyInteger('active')->default(1);
             $table->double('cost', 8, 2);
             $table->double('profit_margin', 5, 2);
-            $table->tinyInteger('category_id')->nullable();
+            $table->integer('category_id')->nullable()->unsigned();
             $table->timestamps();
         });
     }

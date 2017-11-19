@@ -10,6 +10,7 @@
     <p>{{$product->cost}}</p>
     <p>{{$product->getPrice()}}</p>
     <p>{{$category->name}}</p>
+    <img src="{{ asset('storage/' . $product->fotopath) }}" alt="">
     <p>Propiedades:</p>
     <ul>
         @foreach ($properties as $property)

@@ -57,11 +57,16 @@ class ProductsController extends Controller
 
         $request->validate($rules, $messages);
 
+        $extensionImagen = $request->file('fotoPath')->getClientOriginalExtension();
+        $fotoPath = $request->file('fotoPath')->storeAs('productos', uniqid() . "." . $extensionImagen, 'public');
+
         $product = \App\Product::create([
             'name' => $request->input('name'),
             'cost' => $request->input('cost'),
             'profit_margin' => $request->input('profit_margin'),
+            'fotopath' => $fotoPath
         ]);
+
 
         $category = \App\Category::find($request->input('category_id'));
 

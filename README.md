@@ -472,11 +472,11 @@ Nosotros ya trajimos cosas de la base de datos, pero todavía no jugamos con las
 ### **Uno a muchos**
 En el caso de las categorías, vamos a estar teniendo una relación de "uno a muchos".
 
-En este caso estaríamos trabajando con la columna `category_id` de la tabla `products` que referencia a la columna `id` de `categories`.
+En este caso estaríamos trabajando con la columna `category_id` de la tabla `products` que referencia a la columna `id` de `categories`. Es decir, cada categoría va a tener muchos productos, pero cada producto solamente va a tener 1 categoría, por eso los productos van a ser los que digan en sus datos, a qué categoría coresponden `category_id`.
 
 Es decir: `products.category_id` --&rarr; `categories.id`
 
-Para esto vamos a agregar las relaciones correspondientes en ambos modelos:
+Para esto vamos a agregar las relaciones correspondientes en ambos modelos, utilizando `belongsToMany` (pertenece a muchos) y `hasMany` (tiene muchos):
 
 #### Product
 Al producto le agregamos su relación con la categoría, en su caso sería con `belongsTo`

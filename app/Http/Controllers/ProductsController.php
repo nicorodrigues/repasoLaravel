@@ -114,4 +114,10 @@ class ProductsController extends Controller
 
         return redirect('/productos');
     }
+
+    public function test() {
+      $products = \App\Product::all();
+
+      return view('test')->with(compact('products'));
+    }
 }
